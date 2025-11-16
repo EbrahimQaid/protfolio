@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المسؤول - نظام إدارة المدرسة</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="admin-dashboard.css">
+</head>
+
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="تبديل القائمة">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo-container">
+        <a class="logo-text" href="index.html"><i class="fa fa-search"></i></a>
+            <a class="logo-text" href="index.html">مدرستي</a>
+        </div>
+        
+        <div class="header-controls">
+            <div class="notifications" role="button" aria-label="الإشعارات" tabindex="0" onclick="adminDashboard.showNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count">3</span>
+            </div>
+            
+            <div class="user-menu">
+                <img id="user-avatar" src="../image/avatar.jpg" alt="صورة المستخدم">
+                <span id="username">مدير النظام</span>
+                <div class="user-dropdown">
+                    <a href="#profile" onclick="adminDashboard.showProfile()">
+                        <i class="fas fa-user"></i> الملف الشخصي
+                    </a>
+                    <a href="#settings" data-section="settings">
+                        <i class="fas fa-cog"></i> الإعدادات
+                    </a>
+                    <a href="#" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav" aria-label="القائمة الرئيسية">
+                <ul>
+                    <li class="active">
+                        <a href="#" data-section="dashboard" aria-current="page">
+                            <i class="fas fa-tachometer-alt"></i> 
+                            <span>الرئيسية</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="users">
+                            <i class="fas fa-users"></i>
+                            <span>المستخدمين</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="classes">
+                            <i class="fas fa-school"></i>
+                            <span>الفصول الدراسية</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="subjects">
+                            <i class="fas fa-book"></i>
+                            <span>المواد الدراسية</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="reports">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>التقارير</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="notifications">
+                            <i class="fas fa-bell"></i>
+                            <span>الإشعارات</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>الإعدادات</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active" aria-labelledby="dashboard-title">
+                <div class="section-header">
+                    <div>
+                        <h2 id="dashboard-title">لوحة التحكم الرئيسية</h2>
+                        <p class="section-description">نظرة عامة على إحصائيات النظام والنشاطات الحديثة</p>
+                    </div>
+                    <div class="welcome-message">
+                        <p>مرحباً بعودتك، <strong id="welcome-user">مدير النظام</strong> 👋</p>
+                    </div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>الطلاب</h3>
+                            <p id="students-count" class="stat-number">0</p>
+                            <span class="stat-change positive">+5%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>المعلمين</h3>
+                            <p id="teachers-count" class="stat-number">0</p>
+                            <span class="stat-change positive">+2%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>الفصول</h3>
+                            <p id="classes-count" class="stat-number">0</p>
+                            <span class="stat-change neutral">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>المواد</h3>
+                            <p id="subjects-count" class="stat-number">0</p>
+                            <span class="stat-change positive">+3%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="chart-container">
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <h3>إحصائيات الحضور</h3>
+                                <select id="attendance-chart-filter" onchange="adminDashboard.updateAttendanceChart()">
+                                    <option value="week">أسبوعي</option>
+                                    <option value="month">شهري</option>
+                                    <option value="year">سنوي</option>
+                                </select>
+                            </div>
+                            <canvas id="attendance-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="recent-activity">
+                        <div class="card-header">
+                            <h3>آخر النشاطات</h3>
+                            <button class="view-all-btn" onclick="adminDashboard.showAllActivities()">عرض الكل</button>
+                        </div>
+                        <div class="activity-list" id="activity-list">
+                            <!-- سيتم ملؤها بالبيانات -->
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <div class="card-header">
+                            <h3>إجراءات سريعة</h3>
+                        </div>
+                        <div class="actions-grid">
+                            <button class="action-btn" data-action="add-user" onclick="adminDashboard.showAddUserForm()">
+                                <i class="fas fa-user-plus"></i>
+                                <span>إضافة مستخدم</span>
+                            </button>
+                            <button class="action-btn" data-action="add-class" onclick="adminDashboard.showAddClassForm()">
+                                <i class="fas fa-school"></i>
+                                <span>إضافة فصل</span>
+                            </button>
+                            <button class="action-btn" data-action="send-notification" onclick="adminDashboard.showAddNotificationForm()">
+                                <i class="fas fa-bell"></i>
+                                <span>إرسال إشعار</span>
+                            </button>
+                            <button class="action-btn" data-action="generate-report" onclick="adminDashboard.generateQuickReport()">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>تقرير سريع</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="system-status">
+                        <div class="card-header">
+                            <h3>حالة النظام</h3>
+                        </div>
+                        <div class="status-list">
+                            <div class="status-item">
+                                <i class="fas fa-database status-icon good"></i>
+                                <span>قاعدة البيانات</span>
+                                <span class="status-badge good">نشط</span>
+                            </div>
+                            <div class="status-item">
+                                <i class="fas fa-server status-icon good"></i>
+                                <span>الخادم</span>
+                                <span class="status-badge good">مستقر</span>
+                            </div>
+                            <div class="status-item">
+                                <i class="fas fa-shield-alt status-icon good"></i>
+                                <span>الأمان</span>
+                                <span class="status-badge good">محمي</span>
+                            </div>
+                            <div class="status-item">
+                                <i class="fas fa-cloud status-icon warning"></i>
+                                <span>التخزين</span>
+                                <span class="status-badge warning">75%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="content-section" aria-labelledby="users-title">
+                <div class="section-header">
+                    <h2 id="users-title">إدارة المستخدمين</h2>
+                    <p class="section-description">إدارة حسابات المستخدمين في النظام</p>
+                </div>
+                
+                <div class="section-controls">
+                    <button id="add-user-btn" class="primary-button" onclick="adminDashboard.showAddUserForm()">
+                        <i class="fas fa-plus"></i> 
+                        <span>إضافة مستخدم جديد</span>
+                    </button>
+                    <div class="controls-group">
+                        <div class="search-container">
+                            <input type="text" id="search-users" placeholder="بحث عن مستخدم..." aria-label="بحث عن مستخدم">
+                            <button class="search-btn" aria-label="بحث">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="filter-container">
+                            <label for="filter-user-role" class="sr-only">تصفية حسب الدور</label>
+                            <select id="filter-user-role">
+                                <option value="all">جميع المستخدمين</option>
+                                <option value="admin">المسؤولين</option>
+                                <option value="teacher">المعلمين</option>
+                                <option value="student">الطلاب</option>
+                                <option value="parent">أولياء الأمور</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" data-view="table">
+                        <i class="fas fa-table"></i>
+                        <span>عرض الجدول</span>
+                    </button>
+                    <button class="view-toggle-btn" data-view="cards">
+                        <i class="fas fa-th-large"></i>
+                        <span>عرض البطاقات</span>
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table id="users-table" aria-describedby="users-title">
+                            <thead>
+                                <tr>
+                                    <th scope="col">الاسم</th>
+                                    <th scope="col">اسم المستخدم</th>
+                                    <th scope="col">الدور</th>
+                                    <th scope="col">البريد الإلكتروني</th>
+                                    <th scope="col">الحالة</th>
+                                    <th scope="col">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <tr class="loading-row">
+                                    <td colspan="6" class="text-center">
+                                        <div class="loading-spinner-small">
+                                            <div class="spinner"></div>
+                                            <span>جاري تحميل البيانات...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-footer">
+                    <div class="table-info">
+                        <span id="users-count">عرض 0 من 0 مستخدم</span>
+                    </div>
+                    <div class="pagination">
+                        <button class="pagination-btn" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span class="pagination-page">الصفحة 1 من 1</span>
+                        <button class="pagination-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Classes Section -->
+            <section id="classes" class="content-section" aria-labelledby="classes-title">
+                <div class="section-header">
+                    <h2 id="classes-title">إدارة الفصول الدراسية</h2>
+                    <p class="section-description">إدارة الفصول والشعب الدراسية</p>
+                </div>
+                
+                <div class="section-controls">
+                    <button id="add-class-btn" class="primary-button" onclick="adminDashboard.showAddClassForm()">
+                        <i class="fas fa-plus"></i>
+                        <span>إضافة فصل جديد</span>
+                    </button>
+                    <div class="controls-group">
+                        <div class="search-container">
+                            <input type="text" id="search-classes" placeholder="بحث عن فصل..." aria-label="بحث عن فصل">
+                            <button class="search-btn" aria-label="بحث">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="filter-container">
+                            <label for="filter-class-level" class="sr-only">تصفية حسب المرحلة</label>
+                            <select id="filter-class-level">
+                                <option value="all">جميع المراحل</option>
+                                <option value="ابتدائي">ابتدائي</option>
+                                <option value="متوسط">متوسط</option>
+                                <option value="ثانوي">ثانوي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table id="classes-table" aria-describedby="classes-title">
+                            <thead>
+                                <tr>
+                                    <th scope="col">اسم الفصل</th>
+                                    <th scope="col">الشعبة</th>
+                                    <th scope="col">المرحلة</th>
+                                    <th scope="col">المعلم المسؤول</th>
+                                    <th scope="col">عدد الطلاب</th>
+                                    <th scope="col">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="classes-table-body">
+                                <tr class="loading-row">
+                                    <td colspan="6" class="text-center">
+                                        <div class="loading-spinner-small">
+                                            <div class="spinner"></div>
+                                            <span>جاري تحميل البيانات...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subjects Section -->
+            <section id="subjects" class="content-section" aria-labelledby="subjects-title">
+                <div class="section-header">
+                    <h2 id="subjects-title">إدارة المواد الدراسية</h2>
+                    <p class="section-description">إدارة المواد والمناهج الدراسية</p>
+                </div>
+                
+                <div class="section-controls">
+                    <button id="add-subject-btn" class="primary-button" onclick="adminDashboard.showAddSubjectForm()">
+                        <i class="fas fa-plus"></i>
+                        <span>إضافة مادة جديدة</span>
+                    </button>
+                    <div class="search-container">
+                        <input type="text" id="search-subjects" placeholder="بحث عن مادة..." aria-label="بحث عن مادة">
+                        <button class="search-btn" aria-label="بحث">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table id="subjects-table" aria-describedby="subjects-title">
+                            <thead>
+                                <tr>
+                                    <th scope="col">اسم المادة</th>
+                                    <th scope="col">الرمز</th>
+                                    <th scope="col">الوصف</th>
+                                    <th scope="col">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjects-table-body">
+                                <tr class="loading-row">
+                                    <td colspan="4" class="text-center">
+                                        <div class="loading-spinner-small">
+                                            <div class="spinner"></div>
+                                            <span>جاري تحميل البيانات...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="content-section" aria-labelledby="reports-title">
+                <div class="section-header">
+                    <h2 id="reports-title">التقارير والإحصائيات</h2>
+                    <p class="section-description">عرض وتصدير التقارير المختلفة</p>
+                </div>
+                
+                <div class="section-controls">
+                    <button class="primary-button" onclick="adminDashboard.generateQuickReport()">
+                        <i class="fas fa-plus"></i>
+                        <span>إنشاء تقرير جديد</span>
+                    </button>
+                </div>
+                
+                <div class="reports-container">
+                    <div class="report-card" onclick="adminDashboard.generateReport('attendance')">
+                        <div class="report-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>تقرير الحضور</h3>
+                            <p>عرض وتصدير تقارير الحضور والغياب للطلاب</p>
+                        </div>
+                        <button class="primary-button">
+                            <i class="fas fa-download"></i>
+                            <span>عرض التقرير</span>
+                        </button>
+                    </div>
+                    
+                    <div class="report-card" onclick="adminDashboard.generateReport('grades')">
+                        <div class="report-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>تقرير الدرجات</h3>
+                            <p>عرض وتصدير تقارير درجات الطلاب</p>
+                        </div>
+                        <button class="primary-button">
+                            <i class="fas fa-download"></i>
+                            <span>عرض التقرير</span>
+                        </button>
+                    </div>
+                    
+                    <div class="report-card" onclick="adminDashboard.generateReport('teachers')">
+                        <div class="report-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>تقرير أداء المعلمين</h3>
+                            <p>عرض وتصدير تقارير أداء المعلمين</p>
+                        </div>
+                        <button class="primary-button">
+                            <i class="fas fa-download"></i>
+                            <span>عرض التقرير</span>
+                        </button>
+                    </div>
+                    
+                    <div class="report-card" onclick="adminDashboard.generateReport('financial')">
+                        <div class="report-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>تقرير إحصائي</h3>
+                            <p>عرض وتصدير تقارير إحصائية عامة</p>
+                        </div>
+                        <button class="primary-button">
+                            <i class="fas fa-download"></i>
+                            <span>عرض التقرير</span>
+                        </button>
+                    </div>
+                    
+                    <div class="report-card" onclick="adminDashboard.generateReport('financial')">
+                        <div class="report-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>تقرير مالي</h3>
+                            <p>عرض وتصدير التقارير المالية للمدرسة</p>
+                        </div>
+                        <button class="primary-button">
+                            <i class="fas fa-download"></i>
+                            <span>عرض التقرير</span>
+                        </button>
+                    </div>
+                    
+                    <div class="report-card" onclick="adminDashboard.generateReport('academic')">
+                        <div class="report-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>تقرير المناهج</h3>
+                            <p>عرض وتصدير تقارير تقدم المناهج الدراسية</p>
+                        </div>
+                        <button class="primary-button">
+                            <i class="fas fa-download"></i>
+                            <span>عرض التقرير</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section id="notifications" class="content-section" aria-labelledby="notifications-title">
+                <div class="section-header">
+                    <h2 id="notifications-title">إدارة الإشعارات</h2>
+                    <p class="section-description">إرسال وإدارة الإشعارات للمستخدمين</p>
+                </div>
+                
+                <div class="section-controls">
+                    <button id="add-notification-btn" class="primary-button" onclick="adminDashboard.showAddNotificationForm()">
+                        <i class="fas fa-plus"></i>
+                        <span>إضافة إشعار جديد</span>
+                    </button>
+                </div>
+                
+                <div class="notifications-container" id="notifications-list">
+                    <!-- سيتم ملؤها بالبيانات -->
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="content-section" aria-labelledby="settings-title">
+                <div class="section-header">
+                    <h2 id="settings-title">إعدادات النظام</h2>
+                    <p class="section-description">إدارة إعدادات المدرسة والنظام</p>
+                </div>
+                
+                <div class="settings-container">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>إعدادات عامة</h3>
+                        </div>
+                        <form id="general-settings-form">
+                            <div class="form-group">
+                                <label for="school-name" class="form-label">
+                                    <i class="fas fa-school"></i>
+                                    اسم المدرسة
+                                </label>
+                                <input type="text" id="school-name" value="مدرستي" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="school-email" class="form-label">
+                                    <i class="fas fa-envelope"></i>
+                                    البريد الإلكتروني
+                                </label>
+                                <input type="email" id="school-email" value="info@school.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="school-phone" class="form-label">
+                                    <i class="fas fa-phone"></i>
+                                    رقم الهاتف
+                                </label>
+                                <input type="tel" id="school-phone" value="0123456789">
+                            </div>
+                            <div class="form-group">
+                                <label for="school-address" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    العنوان
+                                </label>
+                                <textarea id="school-address" rows="3">شارع المدارس، المدينة</textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="primary-button">حفظ الإعدادات</button>
+                                <button type="reset" class="secondary-button">إعادة تعيين</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>إعدادات النظام</h3>
+                        </div>
+                        <form id="system-settings-form">
+                            <div class="form-group">
+                                <label for="academic-year" class="form-label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    العام الدراسي
+                                </label>
+                                <input type="text" id="academic-year" value="2023-2024" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="current-term" class="form-label">
+                                    <i class="fas fa-book"></i>
+                                    الفصل الدراسي الحالي
+                                </label>
+                                <select id="current-term" required>
+                                    <option value="الفصل الأول" selected>الفصل الأول</option>
+                                    <option value="الفصل الثاني">الفصل الثاني</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="theme" class="form-label">
+                                    <i class="fas fa-palette"></i>
+                                    سمة النظام
+                                </label>
+                                <select id="theme" required>
+                                    <option value="light" selected>فاتح</option>
+                                    <option value="dark">داكن</option>
+                                    <option value="auto">تلقائي</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="language" class="form-label">
+                                    <i class="fas fa-language"></i>
+                                    لغة النظام
+                                </label>
+                                <select id="language" required>
+                                    <option value="ar" selected>العربية</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="primary-button">حفظ الإعدادات</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>أدوات النظام</h3>
+                        </div>
+                        <div class="system-tools">
+                            <button class="tool-btn" onclick="adminDashboard.exportData()">
+                                <i class="fas fa-download"></i>
+                                <span>تصدير البيانات</span>
+                            </button>
+                            <button class="tool-btn" onclick="adminDashboard.importData()">
+                                <i class="fas fa-upload"></i>
+                                <span>استيراد البيانات</span>
+                            </button>
+                            <button class="tool-btn warning" onclick="adminDashboard.clearCache()">
+                                <i class="fas fa-trash"></i>
+                                <span>مسح الذاكرة</span>
+                            </button>
+                            <button class="tool-btn danger" onclick="adminDashboard.resetSystem()">
+                                <i class="fas fa-redo"></i>
+                                <span>إعادة تعيين النظام</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- User Modal -->
+    <div id="user-modal" class="modal" role="dialog" aria-labelledby="user-modal-title">
+        <div class="modal-content">
+            <span class="close" role="button" aria-label="إغلاق">&times;</span>
+            <h3 id="user-modal-title">إضافة مستخدم جديد</h3>
+            <form id="user-form">
+                <input type="hidden" id="user-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-name" class="form-label">
+                            <i class="fas fa-user"></i>
+                            الاسم الكامل
+                        </label>
+                        <input type="text" id="user-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-username" class="form-label">
+                            <i class="fas fa-at"></i>
+                            اسم المستخدم
+                        </label>
+                        <input type="text" id="user-username" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-password" class="form-label">
+                            <i class="fas fa-lock"></i>
+                            كلمة المرور
+                        </label>
+                        <input type="password" id="user-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-email" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            البريد الإلكتروني
+                        </label>
+                        <input type="email" id="user-email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-phone" class="form-label">
+                            <i class="fas fa-phone"></i>
+                            رقم الهاتف
+                        </label>
+                        <input type="tel" id="user-phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="user-role" class="form-label">
+                            <i class="fas fa-user-tag"></i>
+                            الدور
+                        </label>
+                        <select id="user-role" required>
+                            <option value="admin">مسؤول</option>
+                            <option value="teacher">معلم</option>
+                            <option value="student">طالب</option>
+                            <option value="parent">ولي أمر</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="class-field" style="display: none;">
+                    <label for="user-class" class="form-label">
+                        <i class="fas fa-school"></i>
+                        الفصل
+                    </label>
+                    <select id="user-class">
+                        <!-- سيتم ملؤها بالفصول -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="user-active" class="form-label">
+                        <i class="fas fa-circle"></i>
+                        الحالة
+                    </label>
+                    <select id="user-active">
+                        <option value="true">نشط</option>
+                        <option value="false">غير نشط</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">حفظ</button>
+                    <button type="button" class="secondary-button" id="cancel-user-btn">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="modal" role="dialog" aria-labelledby="change-password-title">
+        <div class="modal-content">
+            <span class="close" role="button" aria-label="إغلاق">&times;</span>
+            <h3 id="change-password-title">تغيير كلمة المرور</h3>
+            <form id="change-password-form">
+                <input type="hidden" id="password-user-id">
+                <div class="form-group">
+                    <label for="new-password" class="form-label">
+                        <i class="fas fa-lock"></i>
+                        كلمة المرور الجديدة
+                    </label>
+                    <input type="password" id="new-password" required minlength="6">
+                    <small class="form-help">يجب أن تكون كلمة المرور至少 6 أحرف</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password" class="form-label">
+                        <i class="fas fa-lock"></i>
+                        تأكيد كلمة المرور
+                    </label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">حفظ</button>
+                    <button type="button" class="secondary-button" id="cancel-password-btn">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notification-modal" class="modal" role="dialog" aria-labelledby="notification-modal-title">
+        <div class="modal-content">
+            <span class="close" role="button" aria-label="إغلاق">&times;</span>
+            <h3 id="notification-modal-title">إرسال إشعار جديد</h3>
+            <form id="notification-form">
+                <div class="form-group">
+                    <label for="notification-title" class="form-label">
+                        <i class="fas fa-heading"></i>
+                        عنوان الإشعار
+                    </label>
+                    <input type="text" id="notification-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="notification-content" class="form-label">
+                        <i class="fas fa-file-alt"></i>
+                        محتوى الإشعار
+                    </label>
+                    <textarea id="notification-content" rows="5" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="notification-recipients" class="form-label">
+                        <i class="fas fa-users"></i>
+                        المستلمون
+                    </label>
+                    <select id="notification-recipients" multiple>
+                        <option value="all">الجميع</option>
+                        <option value="students">الطلاب فقط</option>
+                        <option value="teachers">المعلمون فقط</option>
+                        <option value="parents">أولياء الأمور فقط</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notification-priority" class="form-label">
+                        <i class="fas fa-exclamation-circle"></i>
+                        الأولوية
+                    </label>
+                    <select id="notification-priority">
+                        <option value="low">منخفضة</option>
+                        <option value="medium">متوسطة</option>
+                        <option value="high">عالية</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">إرسال الإشعار</button>
+                    <button type="button" class="secondary-button" id="cancel-notification-btn">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Generator Modal -->
+    <div id="report-modal" class="modal" role="dialog" aria-labelledby="report-modal-title">
+        <div class="modal-content">
+            <span class="close" role="button" aria-label="إغلاق">&times;</span>
+            <h3 id="report-modal-title">إنشاء تقرير</h3>
+            <form id="report-form">
+                <div class="form-group">
+                    <label for="report-type" class="form-label">
+                        <i class="fas fa-chart-bar"></i>
+                        نوع التقرير
+                    </label>
+                    <select id="report-type" required>
+                        <option value="attendance">تقرير الحضور</option>
+                        <option value="grades">تقرير الدرجات</option>
+                        <option value="students">تقرير الطلاب</option>
+                        <option value="teachers">تقرير المعلمين</option>
+                        <option value="financial">تقرير مالي</option>
+                        <option value="academic">تقرير أكاديمي</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="report-start-date" class="form-label">
+                            <i class="fas fa-calendar"></i>
+                            من تاريخ
+                        </label>
+                        <input type="date" id="report-start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="report-end-date" class="form-label">
+                            <i class="fas fa-calendar"></i>
+                            إلى تاريخ
+                        </label>
+                        <input type="date" id="report-end-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="report-format" class="form-label">
+                        <i class="fas fa-file"></i>
+                        تنسيق التقرير
+                    </label>
+                    <select id="report-format">
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                        <option value="html">HTML</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-cog"></i>
+                        خيارات إضافية
+                    </label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-charts">
+                            <span class="checkmark"></span>
+                            تضمين الرسوم البيانية
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-summary">
+                            <span class="checkmark"></span>
+                            تضمين ملخص تنفيذي
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="color-coded">
+                            <span class="checkmark"></span>
+                            ترميز الألوان
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">
+                        <i class="fas fa-download"></i>
+                        إنشاء التقرير
+                    </button>
+                    <button type="button" class="secondary-button" id="cancel-report-btn">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>جاري التحميل...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="admin-dashboard.js"></script>
+    <script src="database.js"> </script>
+    
+</body>
+</html>
